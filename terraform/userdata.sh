@@ -6,9 +6,10 @@ yum update -y
 curl -fsSL https://rpm.nodesource.com/setup_18.x | bash -
 yum install -y nodejs
 
-# Get the Availability Zone from AWS Metadata API
+# Get the Availability Zone and Instance ID from AWS Metadata API
 TOKEN=$(curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
 AZ=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" -s http://169.254.169.254/latest/meta-data/placement/availability-zone)
+INSTANCE_ID=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" -s http://169.254.169.254/latest/meta-data/instance-id)
 
 # Create Application Directory
 mkdir -p /home/ec2-user/app
@@ -24,9 +25,9 @@ const express = require('express');
 const app = express();
 const port = 80;
 
-// Main route showing the Availability Zone
+// Main route showing the Instance ID and Availability Zone
 app.get('/', (req, res) => {
-    res.send('<html><body><h1>Instance serving from: ${AZ}</h1></body></html>');
+    res.send('<html><body><h1>Instance: ${INSTANCE_ID} <br> Availability Zone: ${AZ}</h1></body></html>');
 });
 
 // Health check endpoint required by the Load Balancer
