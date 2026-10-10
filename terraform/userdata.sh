@@ -1,10 +1,12 @@
 #!/bin/bash
 # Update system packages
-yum update -y
+apt-get update -y
+apt-get upgrade -y
 
 # Install Node.js
-curl -fsSL https://rpm.nodesource.com/setup_18.x | bash -
-yum install -y nodejs
+curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
+apt-get install -y nodejs
+apt-get install -y libcap2-bin
 
 # Get the Availability Zone and Instance ID from AWS Metadata API
 TOKEN=$(curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
@@ -12,8 +14,8 @@ AZ=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" -s http://169.254.169.254/latest
 INSTANCE_ID=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" -s http://169.254.169.254/latest/meta-data/instance-id)
 
 # Create Application Directory
-mkdir -p /home/ec2-user/app
-cd /home/ec2-user/app
+mkdir -p /home/ubuntu/app
+cd /home/ubuntu/app
 
 # Initialize npm and install Express
 npm init -y
@@ -55,12 +57,12 @@ Description=Node.js Express App
 After=network.target
 
 [Service]
-ExecStart=/usr/bin/node /home/ec2-user/app/server.js
+ExecStart=/usr/bin/node /home/ubuntu/app/server.js
 Restart=always
-User=ec2-user
+User=ubuntu
 Environment=PATH=/usr/bin:/usr/local/bin
 Environment=NODE_ENV=production
-WorkingDirectory=/home/ec2-user/app
+WorkingDirectory=/home/ubuntu/app
 
 [Install]
 WantedBy=multi-user.target

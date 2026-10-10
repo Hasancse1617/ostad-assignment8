@@ -4,8 +4,8 @@ variable "aws_region" {
 }
 
 variable "ami_id" {
-  description = "Amazon Linux 2023 AMI for us-east-1"
-  default     = "ami-0b72821e2f351e396"
+  description = "Ubuntu Server 22.04 LTS AMI for us-east-1"
+  default     = "ami-0c7217cdde317cfec"
 }
 
 variable "instance_type" {
