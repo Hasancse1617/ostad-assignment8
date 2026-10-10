@@ -1,6 +1,7 @@
 # High-Availability Web Service with Load Balancing
 
 **Name:** Md Hasan Ali
+
 **Option Chosen:** Option A – AWS Application Load Balancer
 
 ---
@@ -118,11 +119,6 @@ You can build this infrastructure either **manually via the AWS Console** OR aut
 ### T6 – Logs / monitoring
 **Expected:** Target metrics or ALB access logs showing requests reaching both instances.
 ![T6-Logs-Monitoring](./screenshots/T6-logs-monitoring.png)
-
-### Optional - Terraform Proof
-**Expected:** Terraform init, plan, apply, and destroy screenshots.
-![TF-Init-Plan](./screenshots/TF-init-plan.png)
-![TF-Apply-Destroy](./screenshots/TF-apply-destroy.png)
 
 ---
 
