@@ -1,18 +1,71 @@
 #!/bin/bash
-# Install Apache
+# Update system packages
 yum update -y
-yum install -y httpd
 
-# Get the Availability Zone
+# Install Node.js
+curl -fsSL https://rpm.nodesource.com/setup_18.x | bash -
+yum install -y nodejs
+
+# Get the Availability Zone from AWS Metadata API
 TOKEN=$(curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
 AZ=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" -s http://169.254.169.254/latest/meta-data/placement/availability-zone)
 
-# Start and enable Apache
-systemctl start httpd
-systemctl enable httpd
+# Create Application Directory
+mkdir -p /home/ec2-user/app
+cd /home/ec2-user/app
 
-# Create index.html
-echo "<h1>Instance serving from: ${AZ}</h1>" > /var/www/html/index.html
+# Initialize npm and install Express
+npm init -y
+npm install express
 
-# Create health check endpoint
-echo "OK" > /var/www/html/health.html
+# Create the Node.js Express server file
+cat <<EOF > server.js
+const express = require('express');
+const app = express();
+const port = 80;
+
+// Main route showing the Availability Zone
+app.get('/', (req, res) => {
+    res.send('<html><body><h1>Instance serving from: ${AZ}</h1></body></html>');
+});
+
+// Health check endpoint required by the Load Balancer
+app.get('/health.html', (req, res) => {
+    res.status(200).send('OK');
+});
+
+// Also support /health just in case
+app.get('/health', (req, res) => {
+    res.status(200).send('OK');
+});
+
+app.listen(port, () => {
+    console.log(\`App listening on port \${port}\`);
+});
+EOF
+
+# Give node permissions to bind to port 80 (since it is a privileged port)
+setcap cap_net_bind_service=+ep $(which node)
+
+# Create a systemd service to run the Node.js app in the background automatically
+cat <<EOF > /etc/systemd/system/nodeapp.service
+[Unit]
+Description=Node.js Express App
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/node /home/ec2-user/app/server.js
+Restart=always
+User=ec2-user
+Environment=PATH=/usr/bin:/usr/local/bin
+Environment=NODE_ENV=production
+WorkingDirectory=/home/ec2-user/app
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# Start and enable the Node.js service so it runs on boot
+systemctl daemon-reload
+systemctl enable nodeapp
+systemctl start nodeapp

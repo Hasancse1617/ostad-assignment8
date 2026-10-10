@@ -1,7 +1,6 @@
 # High-Availability Web Service with Load Balancing
 
-**Name:** [Your Name]
-**Student ID:** [Your ID]
+**Name:** Md Hasan Ali
 **Option Chosen:** Option A – AWS Application Load Balancer
 
 ---
@@ -35,7 +34,7 @@ graph TD
     *   **EC2 Security Group:** Allows inbound HTTP (port 80) traffic *only* from the ALB Security Group (to prevent direct access) and SSH (optional, for debugging).
 *   **Application Load Balancer (ALB):** Distributes incoming user traffic across the healthy EC2 instances in different AZs.
 *   **Target Group & Health Checks:** Monitors the `/health.html` endpoint. If an instance fails, the target group marks it unhealthy and ALB stops sending traffic to it.
-*   **EC2 Instances:** Two Amazon Linux web servers running Apache (httpd). They serve an `index.html` file showing their AZ name and a `health.html` returning HTTP 200 OK.
+*   **EC2 Instances:** Two Amazon Linux web servers running a Node.js (Express) app. They serve an index route showing their AZ name and a `/health.html` endpoint returning HTTP 200 OK.
 
 ---
 
