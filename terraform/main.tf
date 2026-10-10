@@ -107,7 +107,7 @@ resource "aws_lb_target_group" "web_tg" {
   vpc_id   = data.aws_vpc.default.id
 
   health_check {
-    path                = "/health.html"
+    path                = "/health"
     port                = 80
     healthy_threshold   = 2
     unhealthy_threshold = 2

@@ -33,8 +33,8 @@ graph TD
     *   **ALB Security Group:** Allows inbound HTTP (port 80) traffic from anywhere (`0.0.0.0/0`).
     *   **EC2 Security Group:** Allows inbound HTTP (port 80) traffic *only* from the ALB Security Group (to prevent direct access) and SSH (optional, for debugging).
 *   **Application Load Balancer (ALB):** Distributes incoming user traffic across the healthy EC2 instances in different AZs.
-*   **Target Group & Health Checks:** Monitors the `/health.html` endpoint. If an instance fails, the target group marks it unhealthy and ALB stops sending traffic to it.
-*   **EC2 Instances:** Two Ubuntu web servers running a Node.js (Express) app. They serve an index route showing their AZ name and a `/health.html` endpoint returning HTTP 200 OK.
+*   **Target Group & Health Checks:** Monitors the `/health` endpoint. If an instance fails, the target group marks it unhealthy and ALB stops sending traffic to it.
+*   **EC2 Instances:** Two Ubuntu web servers running a Node.js (Express) app. They serve an index route showing their AZ name and a `/health` endpoint returning HTTP 200 OK.
 
 ---
 
@@ -55,7 +55,7 @@ You can build this infrastructure either **manually via the AWS Console** OR aut
 
 **Problem 3 - Configure Load Balancer:**
 1. Go to Target Groups -> Create Target Group. Target type: Instances. Protocol: HTTP, Port: 80.
-2. In Health Checks: Path `/health.html`.
+2. In Health Checks: Path `/health`.
 3. Register the two EC2 instances as targets.
 4. Go to Load Balancers -> Create Application Load Balancer.
 5. Scheme: Internet-facing. Select the Default VPC and both AZs (`ap-southeast-1a`, `ap-southeast-1b`).
@@ -77,7 +77,7 @@ You can build this infrastructure either **manually via the AWS Console** OR aut
 
 ## Problem 4 – Health Checks Implementation
 
-*   **Path:** `/health.html`
+*   **Path:** `/health`
 *   **Interval:** 30 seconds (Checks the instance every 30s)
 *   **Timeout:** 5 seconds (If no response in 5s, the check fails)
 *   **Healthy Threshold:** 2 (Needs 2 consecutive successes to be marked healthy)
@@ -85,7 +85,7 @@ You can build this infrastructure either **manually via the AWS Console** OR aut
 *   **Justification:** These values provide a good balance. A 30s interval ensures we don't overload the server with checks, but a threshold of 2 means we can detect a failure within 1 minute. It allows fast removal of failed instances and fast recovery.
 
 **Active vs Passive Health Checks:**
-*   **Active Health Checks:** The Load Balancer actively sends periodic requests (like a ping) to a specific endpoint (e.g., `/health.html`) to check the server status, even if there is no user traffic.
+*   **Active Health Checks:** The Load Balancer actively sends periodic requests (like a ping) to a specific endpoint (e.g., `/health`) to check the server status, even if there is no user traffic.
 *   **Passive Health Checks:** The Load Balancer monitors real user traffic. If users get a certain number of errors (like 500 Internal Server Error) or timeouts, it marks the server as unhealthy.
 *   **What AWS ALB uses:** AWS Application Load Balancer uses **Active Health Checks**. It proactively pings the configured path in the target group.
 
