@@ -28,7 +28,7 @@ graph TD
 
 ### Component Description
 *   **VPC:** We used the Default AWS VPC for simplicity, which spans multiple AZs.
-*   **Subnets & AZs:** We used two subnets in two different Availability Zones (e.g., `us-east-1a` and `us-east-1b`) to ensure high availability.
+*   **Subnets & AZs:** We used two subnets in two different Availability Zones (e.g., `ap-southeast-1a` and `ap-southeast-1b`) to ensure high availability.
 *   **Security Groups:**
     *   **ALB Security Group:** Allows inbound HTTP (port 80) traffic from anywhere (`0.0.0.0/0`).
     *   **EC2 Security Group:** Allows inbound HTTP (port 80) traffic *only* from the ALB Security Group (to prevent direct access) and SSH (optional, for debugging).
@@ -46,19 +46,19 @@ You can build this infrastructure either **manually via the AWS Console** OR aut
 
 **Problem 2 - Build Two Instances:**
 1. Go to EC2 Dashboard -> Launch Instances.
-2. Select Ubuntu Server 22.04 LTS AMI, `t2.micro` instance type.
-3. Network Settings: Select Default VPC. Choose Subnet in AZ `us-east-1a`.
+2. Select Ubuntu Server 24.04 LTS AMI, `t3.micro` instance type.
+3. Network Settings: Select Default VPC (or your Custom VPC). Choose Subnet in AZ `ap-southeast-1a`.
 4. Create a Security Group allowing HTTP from anywhere.
 5. In Advanced Details -> User Data, paste the startup script (see `terraform/userdata.sh` in this repo).
 6. Launch Instance 1.
-7. Repeat the steps to launch Instance 2, but this time select a Subnet in AZ `us-east-1b`.
+7. Repeat the steps to launch Instance 2, but this time select a Subnet in AZ `ap-southeast-1b`.
 
 **Problem 3 - Configure Load Balancer:**
 1. Go to Target Groups -> Create Target Group. Target type: Instances. Protocol: HTTP, Port: 80.
 2. In Health Checks: Path `/health.html`.
 3. Register the two EC2 instances as targets.
 4. Go to Load Balancers -> Create Application Load Balancer.
-5. Scheme: Internet-facing. Select the Default VPC and both AZs (`us-east-1a`, `us-east-1b`).
+5. Scheme: Internet-facing. Select the Default VPC and both AZs (`ap-southeast-1a`, `ap-southeast-1b`).
 6. Security Group: Create or select the one allowing HTTP on port 80.
 7. Listener: Port 80, Default action: Forward to the Target Group created earlier.
 8. Create ALB.
